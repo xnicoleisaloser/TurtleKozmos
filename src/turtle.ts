@@ -85,7 +85,7 @@ export class Turtle {
         };
 
         this.move = (blocks: number, direction: 'up' | 'down' | 'left' | 'right' | 'forward' | 'backward') => {
-
+            this.turtleFuncCall("move", [direction, blocks.toString()], "tools");
         };
 
         this.dig = (direction: 'up' | 'down' | 'left' | 'right' | 'forward' | 'backward') => {

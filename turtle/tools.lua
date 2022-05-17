@@ -94,24 +94,25 @@ function tools.turn(rotations, direction)
     if direction == "left" then for _ = 1, rotations, 1 do turtle.turnLeft() end rotations = rotations * -1 end
 
     return Json.encode({
-        type = "setValue",
+        command = "setValue",
         valueName = "direction",
         offset = rotations
     })
 end
 
 
--- Moves the turtle the direction and amount specified
-function tools.move(param)
-    if direction == "left" then
-
-    elseif direction == "right" then
-
-    else
-
-    end
+-- Like move, but better
+function tools.move(args)
+    direction = args[1]
+    blocks = tonumber(args[2])
 
 
+    if direction == "up" then turtle.up() end
+    if direction == "down" then turtle.down() end
+    if direction == "left" then turtle.turnLeft(); turtle.forward(); turtle.turnRight() end
+    if direction == "right" then turtle.turnRight(); turtle.forward(); turtle.turnLeft() end
+    if direction == "forward" then turtle.forward() end
+    if direction == "backward" then turtle.backward() end
 end
 
 -- Like dig, but better
@@ -139,7 +140,7 @@ function tools.place(args)
 end
 
 -- Like drop, but better
-function tools.place(args)
+function tools.drop(args)
     direction = args[1]
     count = tonumber(args[2])
 
@@ -215,7 +216,7 @@ function tools.callFunc(func, arguments, module)
         return turtle[func](arguments)
     end
 
-    return "error", ""
+    return {"command"}
 end
 
 return tools

@@ -25,7 +25,7 @@ local function networkLoop(wsConnection)
 
         jsonData = Json.decode(message)
 
-        print("Message Received of Type: " .. jsonData["type"])
+        print("Command Received: " .. jsonData["type"])
 
         wsConnection.send(Api.parseMessage(jsonData, wsConnection, Name))
     end

@@ -35,8 +35,9 @@ export class Api {
     }
 
     static listClients() {
-
+        
     }
+
 
     static handleCommandAdmin(message: Message, clients: Map<string, Turtle>) {
     }
