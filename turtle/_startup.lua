@@ -2,7 +2,7 @@
 
 -- wget run http://**.***.**.**:8765/startup.lua
 
-host = "http://**.***.**.***:8765/"
+host = {replace_me}
 
 files = {
     "api.lua",

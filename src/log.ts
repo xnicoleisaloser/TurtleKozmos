@@ -49,6 +49,11 @@ export class Log {
         this.write(log_str);
     }
 
+    log_error(error: string) {
+        console.error(error);
+        this.write(error);
+    }
+
     end_logging() {
         this.file_stream.end();
     }

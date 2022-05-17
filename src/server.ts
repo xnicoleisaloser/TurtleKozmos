@@ -6,15 +6,28 @@ import { Turtle, Position, InventorySlot } from './turtle';
 import { AddressInfo } from 'net';
 import {RawData} from "ws";
 import {Log} from "./log";
+import {readFileSync} from "fs";
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const log = new Log('log', 1);
+const api = new Api(log);
+const host = `${api.getIp()}:8765/`
+
+console.log(`Bootstrap Oneliner: wget run http://${host}startup.lua`)
 
 // Used for hosting our turtle code
 app.use(express.static("./turtle"));
 
+// For inserting host manually into hosted lua files
+app.get('/startup.lua', (request, response) => {
+    response.send(readFileSync("./turtle/_startup.lua").toString().replace("host = {replace_me}", `host = "http://${host}"`));
+});
+
+app.get('/main.lua', (request, response) => {
+    response.send(readFileSync("./turtle/_main.lua").toString().replace("Host = {replace_me}", `Host = "${host}"`));
+});
 // Client list
 let clients = new Map<string, Turtle>();
 
@@ -33,13 +46,13 @@ wss.on('connection', (ws: WebSocket) => {
     // Handle incoming messages
     ws.on('message', (data: RawData) => {
         let messageString: string = data.toString();
-        let message: Message = Api.parseMessage(messageString);
+        let message: Message = api.parseMessage(messageString);
 
         log.log_message(message);
 
         switch (message.name) {
             case 'Admin':
-                Api.handleCommandAdmin(message, clients);
+                api.handleCommandAdmin(message, clients);
                 break;
 
             default:
@@ -49,7 +62,7 @@ wss.on('connection', (ws: WebSocket) => {
                     clients.set(turtle.name, turtle)
                     clients.delete(turtle.turtleId);
                 }
-                Api.handleCommandTurtle(message, clients);
+                api.handleCommandTurtle(message, clients);
                 break;
         }
     })

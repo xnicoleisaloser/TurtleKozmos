@@ -2,7 +2,7 @@ Json = require "json"
 Base64 = require "base64"
 Api = require "api"
 Tools = require "tools"
-Host = "ws://**.***.**.***:8765"
+Host = {replace_me}
 
 -- Connects to host and returns websocket object
 local function initWS()

@@ -4,6 +4,7 @@
 // "oh you're so traumatized it makes me want to cry"
 
 import ws = require("ws")
+import {Message} from "./api";
 
 export class InventorySlot {
     itemName?: string;
@@ -12,6 +13,25 @@ export class InventorySlot {
     constructor(itemName: string, itemCount: number) {
         this.itemName = itemName;
         this.itemCount = itemCount;
+    }
+}
+
+export class Inventory {
+    static parseInventory(inventoryString?: string) {
+        if (inventoryString) {
+            // holy shit this is a hack
+            let inventoryJson = JSON.parse("{ \"inventory\":" + JSON.stringify(inventoryString).toString() + "}")["inventory"];
+            let inventory: InventorySlot[] = [];
+
+            for (const slot of inventoryJson) {
+                let inventorySlot = new InventorySlot(slot["name"], slot["count"]);
+                inventory.push(inventorySlot);
+            }
+
+            return inventory;
+
+        }
+        else return undefined
     }
 }
 
@@ -36,6 +56,9 @@ export class Turtle {
     inventory: InventorySlot[];
     selectedSlot: number
     connection: ws;
+    blockFront?: string;
+    blockBelow?: string;
+    blockAbove?: string;
 
     incrementDirection: (count: number) => void;
     decrementDirection: (count: number) => void;
@@ -58,6 +81,8 @@ export class Turtle {
     turtleEval: (expression: string) => void;
     turtleFuncCall: (func: string, args: string[], module: "global" | "tools" | "turtle") => void;
 
+    heartbeat: (message: Message) => void;
+
     constructor(turtleId: string, connection: ws) {
         this.connection = connection;
         this.turtleId = turtleId;
@@ -68,6 +93,7 @@ export class Turtle {
         this.fuelLevel = 0;
         this.selectedSlot = 0;
         this.inventory = [new InventorySlot("minecraft:air", 0)];
+
 
 
         this.turtleEval = (expression: string) => {
@@ -118,6 +144,14 @@ export class Turtle {
 
         this.refuel = (count) => {
             this.turtleFuncCall("refuel", [count.toString()], "tools");
+        }
+
+        this.heartbeat = (message: Message) => {
+            this.fuelLevel = message.fuelLevel as number;
+            this.blockFront = message.blockFront as string;
+            this.blockBelow = message.blockBelow as string;
+            this.blockAbove = message.blockAbove as string;
+            this.inventory = message.inventory as InventorySlot[];
         }
 
         this.incrementDirection = (count) => {
