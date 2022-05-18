@@ -152,6 +152,7 @@ export class Turtle {
             this.blockBelow = message.blockBelow as string;
             this.blockAbove = message.blockAbove as string;
             this.inventory = message.inventory as InventorySlot[];
+            this.selectedSlot = message.selectedSlot as number;
         }
 
         this.incrementDirection = (count) => {

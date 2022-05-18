@@ -21,16 +21,24 @@ export class Message {
     blockBelow?: string;
     blockAbove?: string;
     inventory?: InventorySlot[];
+    selectedSlot?: number;
 
     isAdmin: () => boolean;
 
     constructor(command: string, name: string, target: string,
                 blockFront?: string, blockBelow?: string, blockAbove?: string,
-                inventory?: InventorySlot[])
+                inventory?: InventorySlot[], selectedSlot?: number, fuelLevel?: number)
     {
         this.name = name;
         this.command = command;
         this.target = target;
+
+        this.blockFront = blockFront;
+        this.blockBelow = blockBelow;
+        this.blockAbove = blockAbove;
+        this.inventory = inventory;
+        this.selectedSlot = selectedSlot;
+        this.fuelLevel = fuelLevel;
 
         this.isAdmin = () => this.name === 'Admin';
     }
@@ -55,6 +63,8 @@ export class Api {
             messageJson['blockBelow'],
             messageJson['blockAbove'],
             Inventory.parseInventory(messageJson['inventory']),
+            messageJson['selectedSlot'],
+            messageJson['fuelLevel']
         );
     }
 

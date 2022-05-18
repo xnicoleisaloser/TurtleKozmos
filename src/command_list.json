@@ -1,6 +1,6 @@
 {
     "list_clients": {
-        "desciption": "Lists connected clients",
+        "description": "Lists connected clients",
         "name": "List Clients",
         "function": "list_clients",
         "arguments": [],
