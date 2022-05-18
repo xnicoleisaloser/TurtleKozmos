@@ -13,7 +13,8 @@ function api.heartbeat()
         blockFront = Tools.inspect({"forward"}),
         blockBelow = Tools.inspect({"down"}),
         blockAbove = Tools.inspect({"up"}),
-        inventory = Tools.getInventory()
+        inventory = Tools.getInventory(),
+        selectedSlot = turtle.getSelectedSlot(),
     })
 end
 
@@ -27,7 +28,7 @@ function api.parseMessage(message, wsConnection, name)
 
         if response ~= nil then
             response["name"] = name
-            return Json.encode(name)
+            return Json.encode(response)
         else
             return api.heartbeat()
         end
