@@ -94,8 +94,6 @@ export class Turtle {
         this.selectedSlot = 0;
         this.inventory = [new InventorySlot("minecraft:air", 0)];
 
-
-
         this.turtleEval = (expression: string) => {
             expression = Buffer.from(expression, 'base64').toString('base64')
             this.connection.send(JSON.stringify({'command': 'eval', 'expression': expression}))
