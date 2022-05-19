@@ -26,13 +26,13 @@ app.use(express.static("./turtle"));
 // For inserting host manually into hosted lua files
 app.get("/startup.lua", (request, response) => {
   response.send(
-    readFileSync("./turtle/_startup.lua").toString().replace("host = {replace_me}", `host = "http://${host}"`)
+    readFileSync("./turtle/_startup.lua").toString().replace("host = { replace_me }", `host = "http://${host}"`)
   );
 });
 
 app.get("/main.lua", (request, response) => {
   response.send(
-    readFileSync("./turtle/_main.lua").toString().replace("Host = {replace_me}", `Host = "${host}"`)
+    readFileSync("./turtle/_main.lua").toString().replace("Host = { replace_me }", `Host = "${host}"`)
   );
 });
 
@@ -42,12 +42,33 @@ app.get("/api/turtles/:turtle", (request, response) => {
 });
 
 app.get("/api/listTurtles", (request, response) => {
-  response.send(clients);
+  console.log(Object.fromEntries(clients));
+  response.send(Object.fromEntries(clients));
 });
 
 app.get("/api/turtles/:turtle/fuelLevel", (request, response) => {
-  response.send((clients.get(request.params.turtle) as Turtle).fuelLevel);
+    response.send((clients.get(request.params.turtle) as Turtle).fuelLevel);
 });
+
+app.get("/api/evalBox", (request, response) => {
+  response.send(`
+    <style>
+        
+    </style>
+    
+     <form action="/eval/">
+      <label for="code">Code:</label><br>
+      <input type="text" id="code" name="code" value=""><br>
+      <input type="submit" value="Run">
+    </form> 
+    `);
+});
+
+app.get("/eval/*", (request, response) => {
+  console.log(decodeURIComponent(request.url));
+  response.send(`<meta http-equiv="refresh" content="7; url='/api/evalBox/'" />`);
+});
+
 
 // Handle new connections
 wss.on("connection", (ws: WebSocket) => {
