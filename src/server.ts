@@ -14,6 +14,7 @@ const wss = new WebSocket.Server({ server });
 const log = new Log('log', 1);
 const api = new Api(log);
 const host = `${api.getIp()}:8765/`
+let clients = new Map<string, Turtle>();
 
 console.log(`Bootstrap Oneliner: wget run http://${host}startup.lua`)
 
@@ -28,8 +29,19 @@ app.get('/startup.lua', (request, response) => {
 app.get('/main.lua', (request, response) => {
     response.send(readFileSync("./turtle/_main.lua").toString().replace("Host = {replace_me}", `Host = "${host}"`));
 });
-// Client list
-let clients = new Map<string, Turtle>();
+
+// Endpoints for fetching data - used for debugging
+app.get('/api/turtles/:turtle', (request, response) => {
+    response.send(clients.get(request.params.turtle));
+})
+
+app.get('/api/listTurtles', (request, response) => {
+    response.send(clients);
+})
+
+app.get('/api/turtles/:turtle/fuelLevel', (request, response) => {
+    response.send((clients.get(request.params.turtle) as Turtle).fuelLevel);
+})
 
 // Handle new connections
 wss.on('connection', (ws: WebSocket) => {
