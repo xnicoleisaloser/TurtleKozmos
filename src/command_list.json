@@ -1,9 +1,9 @@
 {
-    "list_clients": {
-        "description": "Lists connected clients",
-        "name": "List Clients",
-        "function": "list_clients",
-        "arguments": [],
-        "aliases": ["ls"]
-    }
+  "list_clients": {
+    "description": "Lists connected clients",
+    "name": "List Clients",
+    "function": "list_clients",
+    "arguments": [],
+    "aliases": ["ls"]
+  }
 }

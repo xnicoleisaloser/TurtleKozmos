@@ -1,7 +1,7 @@
-import {Turtle} from "./turtle";
+import { Turtle } from "./turtle";
 
 export class Admin {
-    getSelectedSlot(turtle: Turtle) {
-        return turtle.selectedSlot;
-    }
+  getSelectedSlot(turtle: Turtle) {
+    return turtle.selectedSlot;
+  }
 }
