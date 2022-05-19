@@ -1,4 +1,4 @@
 module.exports = {
-  entry: { web: __dirname + "/src/server.ts" },
+  entry: { web: __dirname + "/frontend/backend.ts" },
   output: { path: __dirname + "/dist" },
 };

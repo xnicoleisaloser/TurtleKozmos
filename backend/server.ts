@@ -1,4 +1,4 @@
-import * as express from "express";
+import express from "express";
 import * as http from "http";
 import * as WebSocket from "ws";
 
@@ -73,7 +73,7 @@ wss.on("connection", (ws: WebSocket) => {
         break;
 
       default:
-        if (!has(message.name)) {
+        if (!clients.has(message.name)) {
           // Migrate our unnamed turtle to a named entry
           turtle.name = message.name;
           clients.set(turtle.name, turtle);
