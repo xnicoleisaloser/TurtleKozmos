@@ -6,7 +6,7 @@ Host = { replace_me }
 
 -- Connects to host and returns websocket object
 local function initWS()
-	local ws, error = http.websocket(Host)
+	local ws, _ = http.websocket(Host)
 
 	if ws then
 		return ws

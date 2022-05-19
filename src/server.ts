@@ -1,11 +1,13 @@
 import * as express from "express";
 import * as http from "http";
 import * as WebSocket from "ws";
+
 import { Message, Api } from "./api";
-import { Turtle, Position, InventorySlot } from "./turtle";
+import { Turtle } from "./turtle";
+import { Log } from "./log";
+
 import { AddressInfo } from "net";
 import { RawData } from "ws";
-import { Log } from "./log";
 import { readFileSync } from "fs";
 
 const app = express();
@@ -71,7 +73,7 @@ wss.on("connection", (ws: WebSocket) => {
         break;
 
       default:
-        if (!clients.has(message.name)) {
+        if (!has(message.name)) {
           // Migrate our unnamed turtle to a named entry
           turtle.name = message.name;
           clients.set(turtle.name, turtle);
@@ -82,7 +84,7 @@ wss.on("connection", (ws: WebSocket) => {
     }
   });
 
-  ws.on("close", (_) => {
+  ws.on("close", () => {
     clients.delete(turtle.name as string);
     console.log("Disconnected %s", turtle.name);
   });

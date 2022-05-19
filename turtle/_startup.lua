@@ -1,7 +1,5 @@
 -- Auto-updating bootstrapping script
 
--- wget run http://**.***.**.**:8765/startup.lua
-
 host = { replace_me }
 
 files = {

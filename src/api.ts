@@ -1,14 +1,5 @@
-// interface Message {
-//     name: String,
-//     command: String,
-//     target?: String,
-//     is_admin(): Boolean,
-// }
-
 import { Inventory, InventorySlot, Turtle } from "./turtle";
-import { compileBundleOptions } from "@swc/core/spack";
 import { Log } from "./log";
-import * as http from "http";
 import request from "sync-request";
 
 export class Message {

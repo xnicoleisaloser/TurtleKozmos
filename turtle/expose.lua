@@ -6,7 +6,7 @@ Tools = require("tools")
 function expose.init()
 	local lines = {}
 
-	for k, library in pairs({ "json", "base64", "tools", "api" }) do
+	for _, library in pairs({ "json", "base64", "tools", "api" }) do
 		local file = fs.open("/" .. library .. ".lua", "r")
 
 		while true do
@@ -36,7 +36,7 @@ function expose.init()
 
 		output = [[]]
 
-		for k, lineInTable in pairs(lines) do
+		for _, lineInTable in pairs(lines) do
 			output = output .. lineInTable .. "\n"
 		end
 	end

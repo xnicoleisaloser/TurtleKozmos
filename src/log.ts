@@ -1,8 +1,5 @@
 import { Message } from "./api";
-import { log } from "util";
-import {createWriteStream, WriteStream} from "fs";
-
-import { appendFile } from "fs";
+import {createWriteStream, appendFile, WriteStream} from "fs";
 
 export class Log {
   output: string;
