@@ -9,12 +9,14 @@ import { Log } from "./log";
 import { AddressInfo } from "net";
 import { RawData } from "ws";
 import { readFileSync } from "fs";
+import { Admin } from "./admin";
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 const log = new Log("log", 1);
-const api = new Api(log);
+const admin = new Admin();
+const api = new Api(log, admin);
 const host = `${api.getIp()}:8765/`;
 const clients = new Map<string, Turtle>();
 
@@ -26,7 +28,9 @@ app.use(express.static("./turtle"));
 // For inserting host manually into hosted lua files
 app.get("/startup.lua", (request, response) => {
   response.send(
-    readFileSync("./turtle/_startup.lua").toString().replace("host = { replace_me }", `host = "http://${host}"`)
+    readFileSync("./turtle/_startup.lua")
+      .toString()
+      .replace("host = { replace_me }", `host = "http://${host}"`)
   );
 });
 
@@ -47,7 +51,7 @@ app.get("/api/listTurtles", (request, response) => {
 });
 
 app.get("/api/turtles/:turtle/fuelLevel", (request, response) => {
-    response.send((clients.get(request.params.turtle) as Turtle).fuelLevel);
+  response.send((clients.get(request.params.turtle) as Turtle).fuelLevel);
 });
 
 app.get("/api/evalBox", (request, response) => {
@@ -69,7 +73,6 @@ app.get("/eval/*", (request, response) => {
   response.send(`<meta http-equiv="refresh" content="7; url='/api/evalBox/'" />`);
 });
 
-
 // Handle new connections
 wss.on("connection", (ws: WebSocket) => {
   // Construct our Turtle object
@@ -90,7 +93,7 @@ wss.on("connection", (ws: WebSocket) => {
 
     switch (message.name) {
       case "Admin":
-        api.handleCommandAdmin(message, clients);
+        api.handleCommandAdmin(message, clients, turtle);
         break;
 
       default:

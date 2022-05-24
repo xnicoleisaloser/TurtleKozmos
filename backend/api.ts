@@ -1,6 +1,7 @@
 import { Inventory, InventorySlot, Turtle } from "./turtle";
 import { Log } from "./log";
 import request from "sync-request";
+import { Admin } from "./admin";
 
 export class Message {
   name: string;
@@ -44,9 +45,11 @@ export class Message {
 
 export class Api {
   public log: Log;
+  private admin: Admin;
 
-  constructor(log: Log) {
+  constructor(log: Log, admin: Admin) {
     this.log = log;
+    this.admin = admin;
   }
 
   parseMessage(message: string) {
@@ -65,9 +68,11 @@ export class Api {
     );
   }
 
-  listClients() {}
-
-  handleCommandAdmin(message: Message, clients: Map<string, Turtle>) {}
+  handleCommandAdmin(message: Message, clients: Map<string, Turtle>, admin: Turtle) {
+    if (this.admin.endpoints.has(message.command)) {
+      this.admin.endpoints.get(message.command)?.func(clients, message.target, admin);
+    }
+  }
 
   handleCommandTurtle(message: Message, clients: Map<string, Turtle>) {
     let currentTurtle =

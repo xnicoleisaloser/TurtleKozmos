@@ -1,23 +1,26 @@
 import { Turtle } from "./turtle";
 
 class Endpoint {
-  name: string;
-  func: () => string;
+  func: (turtles: Map<string, Turtle>, targetTurtle: string, admin: Turtle) => void;
 
-  constructor(name: string, func: () => string) {
-    this.name = name;
+  constructor(func: (turtles: Map<string, Turtle>, targetTurtle: string, admin: Turtle) => void) {
     this.func = func;
   }
 }
 
 export class Admin {
-  public endpoints: Endpoint[] = [];
+  public endpoints = new Map<string, Endpoint>();
 
-  command(name: string, command: () => string) {
-    this.endpoints.push(new Endpoint(name, command));
+  command(
+    name: string,
+    command: (turtles: Map<string, Turtle>, targetTurtle: string, admin: Turtle) => void
+  ) {
+    this.endpoints.set(name, new Endpoint(command));
   }
 
-  getSelectedSlot(turtle: Turtle) {
-    return turtle.selectedSlot;
+  constructor() {
+    this.command("listTurtles", (turtles, targetTurtle, admin) => {
+      admin.connection.send(JSON.stringify({ turtles: turtles.toString() }));
+    });
   }
 }
