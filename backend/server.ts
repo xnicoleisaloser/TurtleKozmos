@@ -10,6 +10,7 @@ import { AddressInfo } from "net";
 import { RawData } from "ws";
 import { readFileSync } from "fs";
 import { Admin } from "./admin";
+import localtunnel from "localtunnel";
 
 const app = express();
 const server = http.createServer(app);
@@ -17,10 +18,23 @@ const wss = new WebSocket.Server({ server });
 const log = new Log("log", 1);
 const admin = new Admin();
 const api = new Api(log, admin);
-const host = `${api.getIp()}:8765/`;
 const clients = new Map<string, Turtle>();
+let host: string;
 
-console.log(`Bootstrap Oneliner: wget run http://${host}startup.lua`);
+
+// Establish connection with local tunnel
+(async () => {
+  const tunnel = await localtunnel({ port: 8765 });
+
+  // the assigned public url for your tunnel
+  // i.e. https://abcdefgjhij.localtunnel.me
+  host = tunnel.url.replace("https://", "").concat(":80/");
+  console.log(`Bootstrap Oneliner: wget run http://${host}startup.lua`);
+
+  tunnel.on('close', () => {
+    console.error("Tunnel Closed");
+  });
+})();
 
 // Used for hosting our turtle code
 app.use(express.static("./turtle"));
@@ -115,5 +129,5 @@ wss.on("connection", (ws: WebSocket) => {
 });
 
 server.listen(process.env.PORT || 8765, () => {
-  console.log(`Server started on port ${(server.address() as AddressInfo).port} :)`);
+  console.log(`Server started :)`);
 });
