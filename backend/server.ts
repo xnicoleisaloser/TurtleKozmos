@@ -1,16 +1,16 @@
 import express from "express";
 import * as http from "http";
 import * as WebSocket from "ws";
+import localtunnel from "localtunnel";
 
 import { Message, Api } from "./api";
 import { Turtle } from "./turtle";
 import { Log } from "./log";
 
-import { AddressInfo } from "net";
 import { RawData } from "ws";
 import { readFileSync } from "fs";
 import { Admin } from "./admin";
-import localtunnel from "localtunnel";
+
 
 const app = express();
 const server = http.createServer(app);
@@ -26,9 +26,8 @@ let host: string;
 (async () => {
   const tunnel = await localtunnel({ port: 8765 });
 
-  // the assigned public url for your tunnel
-  // i.e. https://abcdefgjhij.localtunnel.me
   host = tunnel.url.replace("https://", "").concat(":80/");
+  console.log(`Server started: ws://${host} - Copied to clipboard`)
   console.log(`Bootstrap Oneliner: wget run http://${host}startup.lua`);
 
   tunnel.on('close', () => {
@@ -129,5 +128,6 @@ wss.on("connection", (ws: WebSocket) => {
 });
 
 server.listen(process.env.PORT || 8765, () => {
-  console.log(`Server started :)`);
+
 });
+

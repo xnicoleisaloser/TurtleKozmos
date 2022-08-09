@@ -70,7 +70,7 @@ export class Api {
 
   handleCommandAdmin(message: Message, clients: Map<string, Turtle>, admin: Turtle) {
     if (this.admin.endpoints.has(message.command)) {
-      this.admin.endpoints.get(message.command)?.func(clients, message.target, admin);
+      this.admin.endpoints.get(message.command)?.func(clients, message.target, admin,  message);
     }
   }
 
