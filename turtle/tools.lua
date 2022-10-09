@@ -1,369 +1,236 @@
-Json = require("json")
-
 local tools = {}
 
--- Like inspect, except returns block name or "minecraft:air" when no block is present
-function tools.inspect(args)
-	direction = args[1]
-
-	if direction == "forward" then
-		local has_block, data = turtle.inspect()
-		if has_block then
-			return data["name"]
-		else
-			return "minecraft:air"
-		end
-	end
-
-	if direction == "up" then
-		local has_block, data = turtle.inspectUp()
-		if has_block then
-			return data["name"]
-		else
-			return "minecraft:air"
-		end
-	end
-
-	if direction == "down" then
-		local has_block, data = turtle.inspectDown()
-		if has_block then
-			return data["name"]
-		else
-			return "minecraft:air"
-		end
-	end
-
-	if direction == "left" then
-		turtle.turnLeft()
-		local has_block, data = turtle.inspect()
-		turtle.turnRight()
-		if has_block then
-			return data["name"]
-		else
-			return "minecraft:air"
-		end
-	end
-
-	if direction == "right" then
-		turtle.turnRight()
-		local has_block, data = turtle.inspect()
-		turtle.turnLeft()
-		if has_block then
-			return data["name"]
-		else
-			return "minecraft:air"
-		end
-	end
-
-	if direction == "backward" then
-		turtle.turnRight()
-		turtle.turnRight()
-		local has_block, data = turtle.inspect()
-		turtle.turnLeft()
-		turtle.turnLeft()
-		if has_block then
-			return data["name"]
-		else
-			return "minecraft:air"
-		end
-	end
+function tools.turn(client, direction, count)
+    if direction == "left" then
+        for i = 1, count do
+            local turned, _ = turtle.turnLeft()
+            
+            if turned then tools.updateFacing(client, "left") end
+        end
+    elseif direction == "right" then
+        for i = 1, count do
+            local turned, _ = turtle.turnRight()
+            
+            if turned then tools.updateFacing(client, "right") end
+        end
+    end
 end
 
--- Returns a random element of a table
-function tools.randTableItem(myTable)
-	return myTable[math.random(1, #myTable)]
+function tools.select(client, slot)
+    local selected, _ = turtle.select(slot)
+    
+    if selected then client.selectedSlot = slot end
 end
 
--- Returns a random name containing one adjective and name
-function tools.createName()
-	local adjectives = {
-		"good",
-		"new",
-		"first",
-		"last",
-		"long",
-		"great",
-		"little",
-		"own",
-		"other",
-		"old",
-		"right",
-		"big",
-		"high",
-		"different",
-		"small",
-		"large",
-		"next",
-		"early",
-		"young",
-		"important",
-		"few",
-		"public",
-		"bad",
-		"same",
-		"able",
-	}
-	local names = {
-		"Zeus",
-		"Hera",
-		"Poseidon",
-		"Demeter",
-		"Ares",
-		"Athena",
-		"Apollo",
-		"Artemis",
-		"Hephaestus",
-		"Aphrodite",
-		"Hermes",
-		"Dionysus",
-		"Hades",
-		"Hypnos",
-		"Nike",
-		"Janus",
-		"Nemesis",
-		"Iris",
-		"Hecate",
-		"Tyche",
-	}
+function tools.place(client, direction)
+    if direction == "up" then
+        turtle.placeUp()
+    end
 
-	return tools.randTableItem(adjectives) .. tools.randTableItem(names)
+    if direction == "down" then
+        turtle.placeDown()
+    end
+
+    if direction == "forward" then
+        turtle.place()
+    end
+
+    if direction == "back" then
+        tools.turn(client, "left", 2)
+        turtle.place()
+        tools.turn(client, "left", 2)
+    end
+
+    if direction == "left" then
+        tools.turn(client, "left", 1)
+        turtle.place()
+        tools.turn(client, "right", 1)
+    end
+
+    if direction == "right" then
+        tools.turn(client, "right", 1)
+        turtle.place()
+        tools.turn(client, "left", 1)
+    end
 end
 
--- Iterate through all slots and refuel turtle - returns turtle fuel level
-function tools.refuel()
-	for i = 1, 16 do
-		turtle.select(i)
-		turtle.refuel()
-	end
+function tools.dig(client, direction)
+    if direction == "up" then
+        turtle.digUp()
+    end
 
-	return turtle.getFuelLevel()
+    if direction == "down" then
+        turtle.digDown()
+    end
+
+    if direction == "forward" then
+        turtle.dig()
+    end
+
+    if direction == "back" then
+        tools.turn(client, "left", 2)
+        turtle.dig()
+        tools.turn(client, "left", 2)
+    end
+
+    if direction == "left" then
+        tools.turn(client, "left", 1)
+        turtle.dig()
+        tools.turn(client, "right", 1)
+    end
+
+    if direction == "right" then
+        tools.turn(client, "right", 1)
+        turtle.dig()
+        tools.turn(client, "left", 1)
+    end
 end
 
--- Returns table containing inventory data (name and count)
-function tools.getInventory()
-	local inventory = {}
+function tools.move(client, direction, count)
+    if direction == "right" then
+        tools.turn(client, "right", 1)
+        tools.move(client, "forward", count)
+        tools.turn(client, "left", 1)
+        return
+    end
 
-	for slot = 1, 16, 1 do
+    if direction == "left" then
+        tools.turn(client, "left", 1)
+        tools.move(client, "forward", count)
+        tools.turn(client, "right", 1)
+        return
+    end
+
+    for i = 1, count do
+        if direction == "forward" then
+            local moved, _ = turtle.forward()
+            
+            if moved then tools.updatePosition(client, "forward") end
+        end
+
+        if direction == "back" then
+            local moved, _ = turtle.back()
+            
+            if moved then tools.updatePosition(client, "back") end
+        end
+
+        if direction == "up" then
+            local moved, _ = turtle.up()
+            
+            if moved then tools.updatePosition(client, "up") end
+        end
+
+        if direction == "down" then
+            local moved, _ = turtle.down()
+            
+            if moved then tools.updatePosition(client, "down") end
+        end
+    end
+end
+
+function tools.updateFacing(client, direction)
+    if direction == "left" then
+        if client.orientation == "north" then
+            client.orientation = "west"
+        elseif client.orientation == "west" then
+            client.orientation = "south"
+        elseif client.orientation == "south" then
+            client.orientation = "east"
+        elseif client.orientation == "east" then
+            client.orientation = "north"
+        end
+    elseif direction == "right" then
+        if client.orientation == "north" then
+            client.orientation = "east"
+        elseif client.orientation == "east" then
+            client.orientation = "south"
+        elseif client.orientation == "south" then
+            client.orientation = "west"
+        elseif client.orientation == "west" then
+            client.orientation = "north"
+        end
+    end
+end
+
+function tools.updatePosition(client, direction)
+    if direction == "forward" then
+        if client.orientation == "north" then
+            client.position.z = client.position.z - 1
+        elseif client.orientation == "east" then
+            client.position.x = client.position.x + 1
+        elseif client.orientation == "south" then
+            client.position.z = client.position.z + 1
+        elseif client.orientation == "west" then
+            client.position.x = client.position.x - 1
+        end
+    elseif direction == "back" then
+        if client.orientation == "north" then
+            client.position.z = client.position.z + 1
+        elseif client.orientation == "east" then
+            client.position.x = client.position.x - 1
+        elseif client.orientation == "south" then
+            client.position.z = client.position.z - 1
+        elseif client.orientation == "west" then
+            client.position.x = client.position.x + 1
+        end
+    elseif direction == "up" then
+        client.position.y = client.position.y + 1
+    elseif direction == "down" then
+        client.position.y = client.position.y - 1
+    end
+end
+
+function tools.initInventory()
+    local inventory = {}
+    
+    for i = 1, 16 do
+        inventory[i] = { name = "minecraft:air", count = 1 }
+    end
+
+    return inventory
+end
+
+function tools.updateInventory(client)
+	for slot = 1, 16 do
 		local item = turtle.getItemDetail(slot)
 
 		if item ~= nil then
-			inventory[slot] = { name = item["name"], count = item["count"] }
-			if item["name"] == itemName then
-				return slot
-			end
-		else
-			inventory[slot] = { name = "minecraft:air", count = 1 }
+			client.inventory[slot] = { name = item["name"], count = item["count"] }
+        else
+			client.inventory[slot] = { name = "minecraft:air", count = 1 }
 		end
 	end
-
-	return inventory
 end
 
--- Turns the direction and amount specified
-function tools.turn(rotations, direction)
-	if direction == "right" then
-		for _ = 1, rotations, 1 do
-			turtle.turnRight()
-		end
-	end
-	if direction == "left" then
-		for _ = 1, rotations, 1 do
-			turtle.turnLeft()
-		end
-		rotations = rotations * -1
-	end
+function tools.updateFuelLevel(client)
+    local fuelLevel = turtle.getFuelLevel()
 
-	return Json.encode({
-		command = "setValue",
-		valueName = "direction",
-		offset = rotations,
-	})
+    if fuelLevel == "unlimited" then
+        client.fuelLevel = 999999
+        return
+    end
+
+    client.fuelLevel = fuelLevel
 end
 
--- Like move, but better
-function tools.move(args)
-	direction = args[1]
-	blocks = tonumber(args[2])
-
-	if direction == "up" then
-		turtle.up()
-	end
-	if direction == "down" then
-		turtle.down()
-	end
-	if direction == "left" then
-		turtle.turnLeft()
-		turtle.forward()
-		turtle.turnRight()
-	end
-	if direction == "right" then
-		turtle.turnRight()
-		turtle.forward()
-		turtle.turnLeft()
-	end
-	if direction == "forward" then
-		turtle.forward()
-	end
-	if direction == "backward" then
-		turtle.backward()
-	end
+function tools.updateSelectedSlot(client)
+    client.selectedSlot = turtle.getSelectedSlot()
 end
 
--- Like dig, but better
-function tools.dig(args)
-	direction = args[1]
-
-	if direction == "up" then
-		turtle.digUp()
-	end
-	if direction == "down" then
-		turtle.digDown()
-	end
-	if direction == "left" then
-		turtle.turnLeft()
-		turtle.dig()
-		turtle.turnRight()
-	end
-	if direction == "right" then
-		turtle.turnRight()
-		turtle.dig()
-		turtle.turnLeft()
-	end
-	if direction == "forward" then
-		turtle.dig()
-	end
-	if direction == "backward" then
-		tools.turn(2, "right")
-		turtle.dig()
-		tools.turn(2, "left")
-	end
+function tools.randTableItem(table)
+	return table[math.random(1, #table)]
 end
 
--- Like place, but better
-function tools.place(args)
-	direction = args[1]
-
-	if direction == "up" then
-		turtle.placeUp()
-	end
-	if direction == "down" then
-		turtle.placeDown()
-	end
-	if direction == "left" then
-		turtle.turnLeft()
-		turtle.place()
-		turtle.turnRight()
-	end
-	if direction == "right" then
-		turtle.turnRight()
-		turtle.place()
-		turtle.turnLeft()
-	end
-	if direction == "forward" then
-		turtle.place()
-	end
-	if direction == "backward" then
-		tools.turn(2, "right")
-		turtle.place()
-		tools.turn(2, "left")
-	end
-end
-
--- Like drop, but better
-function tools.drop(args)
-	direction = args[1]
-	count = tonumber(args[2])
-
-	if direction == "up" then
-		turtle.drop(count)
-	end
-	if direction == "down" then
-		turtle.dropDown(count)
-	end
-	if direction == "left" then
-		turtle.turnLeft()
-		turtle.drop(count)
-		turtle.turnRight()
-	end
-	if direction == "right" then
-		turtle.turnRight()
-		turtle.drop(count)
-		turtle.turnLeft()
-	end
-	if direction == "forward" then
-		turtle.drop(count)
-	end
-	if direction == "backward" then
-		tools.turn(2, "right")
-		turtle.drop(count)
-		tools.turn(2, "left")
-	end
-end
-
--- Like turtle.select, but better
-function tools.select(args)
-	turtle.select(args[1])
-end
-
--- Like turtle.craft, but better
-function tools.craft(args)
-	turtle.craft(args[1])
-end
-
--- Like turtle.refuel, but better
-function tools.refuel(args)
-	turtle.refuel(args[1])
-end
-
--- like .split() in python
-function tools.split(inputstr, sep)
-	if sep == nil then
-		sep = "%s"
-	end
-
-	local t = {}
-	for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
-		table.insert(t, str)
-	end
-
-	return t
-end
-
--- Eval - loadstring looks ugly
-function tools.eval(expression)
-	local func = loadstring(expression)
-	return func()
-end
-
--- Basic turtle setup
-function tools.init()
-	-- Name should always be equal to the computer label
-	if os.getComputerLabel() ~= nil then
-		Name = os.getComputerLabel()
-	else
-		Name = tools.createName()
-		os.setComputerLabel(Name)
-	end
-end
-
--- Better than eval, I think it's important for this to be located
--- at the bottom of the file, I could be wrong tho
-function tools.callFunc(func, arguments, module)
-	arguments = tools.split(arguments, ",")
-
-	if module == "global" then
-		return _G[func](arguments)
-	end
-
-	if module == "tools" then
-		return tools[func](arguments)
-	end
-
-	if module == "turtle" then
-		return turtle[func](arguments)
-	end
-
-	return { "command" }
+function tools.serializeClient(client)
+    return Json.encode({
+        name = client.name,
+        uuid = client.uuid,
+        position = client.position,
+        orientation = client.orientation,
+        inventory = client.inventory,
+        selectedSlot = client.selectedSlot,
+        fuelLevel = client.fuelLevel,
+    })
 end
 
 return tools

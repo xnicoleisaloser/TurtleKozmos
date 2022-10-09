@@ -1,50 +1,68 @@
-Tools = require("tools")
-Json = require("json")
-Base64 = require("base64")
-
 local api = {}
 
--- Should be called occasionally and as a response to every command
-function api.heartbeat()
-	return Json.encode({
-		name = Name,
-		command = "heartbeat",
-		fuelLevel = turtle.getFuelLevel(),
-		blockFront = Tools.inspect({ "forward" }),
-		blockBelow = Tools.inspect({ "down" }),
-		blockAbove = Tools.inspect({ "up" }),
-		inventory = Tools.getInventory(),
-		selectedSlot = turtle.getSelectedSlot(),
-	})
+Tools = require("tools")
+
+function api.serialzeCritical(client)
+    return Json.encode({
+        name = client.name,
+        uuid = client.uuid,
+        position = client.position,
+        orientation = client.orientation,
+    })
+
 end
 
--- Where the magic happens
-function api.parseMessage(message, wsConnection, name)
-	local command = message["command"]
+function api.serializeClient(client)
+    return Json.encode({
+        name = client.name,
+        uuid = client.uuid,
+        position = client.position,
+        orientation = client.orientation,
+        inventory = client.inventory,
+        selectedSlot = client.selectedSlot
+    })
+end
 
-	if command == "eval" then
-		return Json.encode({
-			name = name,
-			command = "eval",
-			response = Base64.encode(Tools.eval(Base64.decode(message["expression"]))),
-		})
-	elseif command == "callFunc" then
-		response = Tools.callFunc(message["function"], message["arguments"], message["module"])
+function api.startupMessage(client)
+    return Json.encode({
+        name = client.name,
+        uuid = client.uuid,
+        position = client.position,
+        orientation = client.orientation,
+        inventory = client.inventory,
+        selectedSlot = client.selectedSlot,
+        type = "startup"
+    })
+end
 
-		if response ~= nil then
-			response["name"] = name
-			return Json.encode(response)
-		else
-			return api.heartbeat()
-		end
-	elseif command == "close" then
-		wsConnection.close()
-		error("Close Signal Received")
-	elseif command == "heartbeat" then
-		return api.heartbeat()
-	else
-		error("Command not found!")
-	end
+function api.handleMessage(message, client)
+    local command = message["command"]
+
+    if command == "move" then
+        Tools.move(client, message["direction"], message["count"])
+    end
+
+    if command == "turn" then
+        Tools.turn(client, message["direction"], message["count"])
+    end
+
+    if command == "select" then
+        Tools.select(client, message["slot"])
+    end
+
+    if command == "place" then
+        Tools.place(client, message["direction"])
+    end
+
+    if command == "dig" then
+        Tools.dig(client, message["direction"])
+    end
+
+    if command == "ping" then
+
+    end
+
+    client.wsConnection.send(Tools.serializeClient(client))
 end
 
 return api
